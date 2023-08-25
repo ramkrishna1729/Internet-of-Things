@@ -1,0 +1,62 @@
+#include &quot;UbidotsESPMQTT.h&quot;
+#include &lt;ESP8266WiFi.h&gt;
+intldrPin = A0;
+/**************
+* Define Constants
+**************/
+#define TOKEN &quot;BBFF-x5e4HGEd4oiVIl6M34KiuJqD6qU3Cx&quot; // Your Ubidots TOKEN
+#define WIFINAME &quot;Redmi&quot; //Your SSID
+#define WIFIPASS &quot;12345678&quot; // Your Wifi Pass
+
+Ubidots client(TOKEN);
+int LED = D3;
+char* variable1 = &quot;led&quot;;
+char* variable2 = &quot;ldr&quot;;
+
+/**************
+* Auxiliar Functions
+**************/
+
+void callback(char* topic, byte* payload, unsigned int length) {
+Serial.print(&quot;Message arrived [&quot;);
+Serial.print(topic);
+Serial.print(&quot;] &quot;);
+for (inti=0;i&lt;length;i++) {
+Serial.print((char)payload[i]);
+}
+
+if ((char)payload[0]==&#39;1&#39;){
+digitalWrite(D3, HIGH);
+}
+else{
+digitalWrite(D3, LOW);
+}
+Serial.println();
+}
+
+void setup() {
+// put your setup code here, to run once:
+Serial.begin(115200);
+client.setDebug(true); // Pass a true or false bool value to activate debug messages
+client.wifiConnection(WIFINAME, WIFIPASS);
+client.begin(callback);
+
+pinMode(D3, OUTPUT);
+client.ubidotsSubscribe(&quot;esp8266-1&quot;,variable1);
+}
+
+void loop() {
+// put your main code here, to run repeatedly:
+if(!client.connected()){
+client.reconnect();
+}
+intldrValue = analogRead(ldrPin);
+
+Serial.println(ldrValue);
+
+client.add(variable2, ldrValue);
+
+client.ubidotsPublish(&quot;esp8266-1&quot;);
+client.loop();
+delay(6000);
+}

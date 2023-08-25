@@ -1,0 +1,20 @@
+ARDUINO-LM35
+
+const int sensorPin = A0;
+float sensorValue = 0;
+float voltageOut;
+float tempC;
+void setup(){
+ pinMode(sensorPin, INPUT);
+ Serial.begin(9600);
+}
+void loop(){
+ sensorValue = analogRead(sensorPin);
+ voltageOut = (sensorValue * 5000) / 1024;
+ tempC = voltageOut / 10;
+
+ Serial.print(tempC);
+ Serial.print((","));
+ Serial.println();
+ delay(3000);
+}

@@ -1,0 +1,38 @@
+import time
+import requests
+import RPi.GPIO as GPIO
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(21,GPIO.OUT)
+
+DEVICE ="LED"
+VARIABLE1 ="BLINK"
+
+TOKEN = "BBFF-x5e4HGEd4oiVIl6M34KiuJqD6qU3Cx"
+
+try:
+    while True:
+        light1 = requests.get("http://things.ubidots.com/api/v1.6/devices/"+DEVICE+"/"+VARIABLE1+"/lv?token="+TOKEN)
+    
+        print(light1.content)     # Returns the content of the response, in bytes
+        print(light1.json())      # Returns a JSON object of the result
+        data = light1.json()
+        print(type(data))
+        if data==1.0:
+            GPIO.output(21,GPIO.HIGH)
+            #GPIO.output(26,GPIO.LOW)
+            print("On")
+            #time.sleep(3)
+        if data==0.0:
+            GPIO.output(21,GPIO.LOW)
+            #GPIO.output(26,GPIO.HIGH)
+            print("Off")
+            #time.sleep(3)
+except KeyboardInterrupt:
+    pass
+finally:
+    GPIO.cleanup()
+    light1 = ''
+    
+

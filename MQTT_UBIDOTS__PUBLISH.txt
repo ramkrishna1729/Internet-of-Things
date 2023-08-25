@@ -1,0 +1,67 @@
+MQTT_UBIDOTS_PUBLISH
+
+#define ldrPin A0
+#include &quot;UbidotsESPMQTT.h&quot; // Ubidots MQTT library
+// Ubidots definitions
+#define TOKEN &quot;BBFF-x5e4HGEd4oiVIl6M34KiuJqD6qU3Cx&quot; // Ubidots token
+#define WIFINAME &quot;Redmi&quot; // WiFi SSID
+#define WIFIPASS &quot;12345678&quot; // WiFi Password
+#define DEVICE_LABEL &quot;MQTT&quot; // Ubidots device label
+// Ubidots client object
+Ubidots client(TOKEN);
+// Ubidots variables
+char* variable1 = &quot;l&quot;;
+// Ubidots callback function
+void callback(char* topic, byte* payload, unsigned int length)
+{
+Serial.print(&quot;Message arrived [&quot;);
+Serial.print(topic);
+Serial.print(&quot;] &quot;);
+
+for (inti = 0; i&lt; length; i++)
+{
+Serial.print((char)payload[i]);
+}
+
+Serial.println();
+}
+
+void setup()
+{
+
+Serial.begin(115200);
+
+client.wifiConnection(WIFINAME, WIFIPASS);
+client.begin(callback);
+
+Serial.println(&quot;Node MCU with Ubidots MQTT&quot;);
+Serial.println(&quot;---------------------------&quot;);
+
+//client.ubidotsSubscribe(DEVICE_LABEL, variable1); // Ubidots subscribe to topic/variable
+
+}
+
+void loop()
+{
+if(!client.connected())
+{
+client.reconnect();
+Serial.println(&quot;Trying to reconnect......&quot;);
+}
+else
+{
+
+intldrValue = analogRead(ldrPin);
+
+Serial.println(&quot;---------Readings--------&quot;);
+Serial.print(&quot;Light: &quot;);
+Serial.println(ldrValue);
+
+client.add(variable1, ldrValue);
+
+client.ubidotsPublish(DEVICE_LABEL);
+}
+
+client.loop();
+delay(5000);
+}
